@@ -11,16 +11,11 @@ export default function Register() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    console.log('API base URL:', import.meta.env.VITE_API_URL);
-    console.log('Submitting to:', api.defaults.baseURL + '/api/auth/register');
     try {
       const res = await api.post('/api/auth/register', { email, password });
       localStorage.setItem('token', res.data.token);
       navigate('/');
     } catch (err: any) {
-      console.error('Register error:', err);
-      console.error('Response:', err.response?.data);
-      console.error('Status:', err.response?.status);
       setError(err.response?.data?.error || err.response?.data?.message || 'Registration failed');
     }
   };
