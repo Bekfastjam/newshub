@@ -25,7 +25,7 @@ export default function Feed() {
     const params = new URLSearchParams();
     if (search) params.append('search', search);
     if (category) params.append('category', category);
-    const res = await api.get(`/news?${params.toString()}`);
+    const res = await api.get(`/api/news?${params.toString()}`);
     setArticles(res.data);
     setLoading(false);
   };

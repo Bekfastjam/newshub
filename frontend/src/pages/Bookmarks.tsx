@@ -19,11 +19,11 @@ export default function Bookmarks() {
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
 
   useEffect(() => {
-    api.get('/bookmarks').then(res => setBookmarks(res.data));
+    api.get('/api/bookmarks').then(res => setBookmarks(res.data));
   }, []);
 
   const removeBookmark = async (id: number) => {
-    await api.delete(`/bookmarks/${id}`);
+    await api.delete(`/api/bookmarks/${id}`);
     setBookmarks(prev => prev.filter(b => b.id !== id));
   };
 

@@ -21,12 +21,12 @@ export default function ArticleDetail() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    api.get(`/news/${id}`).then(res => setArticle(res.data));
+    api.get(`/api/news/${id}`).then(res => setArticle(res.data));
   }, [id]);
 
   const handleBookmark = async () => {
     try {
-      await api.post('/bookmarks', { articleId: Number(id) });
+      await api.post('/api/bookmarks', { articleId: Number(id) });
       setBookmarked(true);
     } catch {
       setBookmarked(true);

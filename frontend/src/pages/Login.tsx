@@ -10,12 +10,13 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     try {
-      const res = await api.post('/auth/login', { email, password });
+      const res = await api.post('/api/auth/login', { email, password });
       localStorage.setItem('token', res.data.token);
       navigate('/');
-    } catch {
-      setError('Invalid email or password');
+    } catch (err: any) {
+      setError(err.response?.data?.error || err.response?.data?.message || 'Login failed');
     }
   };
 
@@ -28,6 +29,8 @@ export default function Login() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="email"
+            id="email"
+            name="email"
             placeholder="Email"
             value={email}
             onChange={e => setEmail(e.target.value)}
@@ -35,6 +38,8 @@ export default function Login() {
           />
           <input
             type="password"
+            id="password"
+            name="password"
             placeholder="Password"
             value={password}
             onChange={e => setPassword(e.target.value)}
@@ -48,7 +53,7 @@ export default function Login() {
           </button>
         </form>
         <p className="text-gray-400 text-sm mt-4 text-center">
-          No account?{' '}
+          Don't have an account?{' '}
           <Link to="/register" className="text-blue-400 hover:underline">Register</Link>
         </p>
       </div>
