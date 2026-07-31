@@ -10,12 +10,18 @@ export default function Register() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    console.log('API base URL:', import.meta.env.VITE_API_URL);
+    console.log('Submitting to:', api.defaults.baseURL + '/api/auth/register');
     try {
-      const res = await api.post('/auth/register', { email, password });
+      const res = await api.post('/api/auth/register', { email, password });
       localStorage.setItem('token', res.data.token);
       navigate('/');
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Registration failed');
+      console.error('Register error:', err);
+      console.error('Response:', err.response?.data);
+      console.error('Status:', err.response?.status);
+      setError(err.response?.data?.error || err.response?.data?.message || 'Registration failed');
     }
   };
 
@@ -28,6 +34,8 @@ export default function Register() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="email"
+            id="email"
+            name="email"
             placeholder="Email"
             value={email}
             onChange={e => setEmail(e.target.value)}
@@ -35,6 +43,8 @@ export default function Register() {
           />
           <input
             type="password"
+            id="password"
+            name="password"
             placeholder="Password (min 6 chars)"
             value={password}
             onChange={e => setPassword(e.target.value)}
