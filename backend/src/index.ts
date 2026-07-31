@@ -12,6 +12,7 @@ import newsRoutes from './routes/news';
 import bookmarkRoutes from './routes/bookmarks';
 import { fetchAllFeeds } from './fetchNews';
 import { summarizeUnsummarized } from './summarizeNews';
+import { prisma } from './db';
 
 const app = express();
 
@@ -46,6 +47,16 @@ cron.schedule('*/30 * * * *', async () => {
 cron.schedule('0 * * * *', async () => {
     console.log('⏰ Cron: Summarizing new articles...');
     await summarizeUnsummarized();
+});
+
+// Cron: cleanup old articles daily at 3 AM
+cron.schedule('0 3 * * *', async () => {
+    console.log('⏰ Cron: Cleaning up old articles...');
+    const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const result = await prisma.article.deleteMany({
+        where: { publishedAt: { lt: cutoff } },
+    });
+    console.log(`🗑️  Deleted ${result.count} old articles`);
 });
 
 const PORT = process.env.PORT || 4000;

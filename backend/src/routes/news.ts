@@ -1,49 +1,90 @@
-import express from 'express';
+import { Router } from 'express';
 import { prisma } from '../db';
 import { fetchAllFeeds } from '../fetchNews';
 import { summarizeUnsummarized } from '../summarizeNews';
 
-const router = express.Router();
-
-// POST /api/news/fetch
-router.post('/fetch', async (req, res) => {
-    await fetchAllFeeds();
-    res.json({ message: 'Fetch complete' });
-});
-
-// POST /api/news/summarize
-router.post('/summarize', async (req, res) => {
-    await summarizeUnsummarized();
-    res.json({ message: 'Summarization complete' });
-});
+const router = Router();
 
 // GET /api/news?category=tech&search=query
 router.get('/', async (req, res) => {
+  try {
     const { category, search } = req.query;
 
     const articles = await prisma.article.findMany({
-        where: {
-            ...(category ? { category: String(category) } : {}),
-            ...(search ? {
-                OR: [
-                    { title: { contains: String(search) } },
-                    { summary: { contains: String(search) } },
-                    { aiSummary: { contains: String(search) } },
-                ],
-            } : {}),
-        },
-        orderBy: { publishedAt: 'desc' },
-        take: 50,
+      where: {
+        ...(category ? { category: String(category) } : {}),
+        ...(search ? {
+          OR: [
+            { title: { contains: String(search) } },
+            { summary: { contains: String(search) } },
+            { aiSummary: { contains: String(search) } },
+          ],
+        } : {}),
+      },
+      orderBy: { publishedAt: 'desc' },
+      take: 50,
     });
+
     res.json(articles);
+  } catch (error) {
+    console.error('Error fetching news:', error);
+    res.status(500).json({ error: 'Failed to fetch news' });
+  }
 });
 
 // GET /api/news/:id
 router.get('/:id', async (req, res) => {
+  try {
     const id = parseInt(req.params.id);
     const article = await prisma.article.findUnique({ where: { id } });
     if (!article) return res.status(404).json({ error: 'Article not found' });
     res.json(article);
+  } catch (error) {
+    console.error('Error fetching article:', error);
+    res.status(500).json({ error: 'Failed to fetch article' });
+  }
+});
+
+// Cron trigger endpoint - fetch news
+router.get('/cron/fetch-news', async (req, res) => {
+  try {
+    console.log('Cron triggered: fetching latest news...');
+    await fetchAllFeeds();
+    res.json({ status: 'ok', message: 'News fetched successfully', timestamp: new Date().toISOString() });
+  } catch (error) {
+    console.error('Cron fetch error:', error);
+    res.status(500).json({ status: 'error', message: 'Failed to fetch news' });
+  }
+});
+
+// Cron trigger endpoint - summarize articles
+router.get('/cron/summarize', async (req, res) => {
+  try {
+    console.log('Cron triggered: summarizing articles...');
+    await summarizeUnsummarized();
+    res.json({ status: 'ok', message: 'Summarization complete', timestamp: new Date().toISOString() });
+  } catch (error) {
+    console.error('Cron summarize error:', error);
+    res.status(500).json({ status: 'error', message: 'Failed to summarize' });
+  }
+});
+
+// Cron trigger endpoint - cleanup old articles
+router.get('/cron/cleanup', async (req, res) => {
+  try {
+    console.log('Cron triggered: cleaning up old articles...');
+    const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+    const result = await prisma.article.deleteMany({
+      where: { publishedAt: { lt: cutoff } }
+    });
+
+    res.json({ status: 'ok', deletedCount: result.count, timestamp: new Date().toISOString() });
+  } catch (error) {
+    console.error('Cleanup error:', error);
+    res.status(500).json({ status: 'error', message: 'Failed to clean up' });
+  }
 });
 
 export default router;
+
