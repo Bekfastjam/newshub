@@ -15,6 +15,7 @@ model User {
   createdAt   DateTime     @default(now())
   bookmarks   Bookmark[]
   preferences Preference[]
+  sourcePreferences SourcePreference[]
 }
 
 model Article {
@@ -44,6 +45,14 @@ model Preference {
   id        Int      @id @default(autoincrement())
   userId    Int
   category  String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model SourcePreference {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  source    String
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
 }

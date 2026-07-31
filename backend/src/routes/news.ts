@@ -5,14 +5,45 @@ import { summarizeUnsummarized } from '../summarizeNews';
 
 const router = Router();
 
-// GET /api/news?category=tech&search=query
+// GET /api/news/meta/sources - distinct list of all sources in DB
+router.get('/meta/sources', async (req, res) => {
+  try {
+    const rows = await prisma.article.findMany({
+      distinct: ['source'],
+      select: { source: true },
+      orderBy: { source: 'asc' },
+    });
+    res.json(rows.map((r) => r.source));
+  } catch (error) {
+    console.error('Error fetching sources:', error);
+    res.status(500).json({ error: 'Failed to fetch sources' });
+  }
+});
+
+// GET /api/news/meta/categories - distinct list of all categories in DB
+router.get('/meta/categories', async (req, res) => {
+  try {
+    const rows = await prisma.article.findMany({
+      distinct: ['category'],
+      select: { category: true },
+      orderBy: { category: 'asc' },
+    });
+    res.json(rows.map((r) => r.category));
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    res.status(500).json({ error: 'Failed to fetch categories' });
+  }
+});
+
+// GET /api/news?category=tech&search=query&source=BBC,TechCrunch
 router.get('/', async (req, res) => {
   try {
-    const { category, search } = req.query;
+    const { category, search, source } = req.query;
 
     const articles = await prisma.article.findMany({
       where: {
         ...(category ? { category: String(category) } : {}),
+        ...(source ? { source: { in: String(source).split(',') } } : {}),
         ...(search ? {
           OR: [
             { title: { contains: String(search) } },
@@ -87,4 +118,3 @@ router.get('/cron/cleanup', async (req, res) => {
 });
 
 export default router;
-

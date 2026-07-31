@@ -10,6 +10,7 @@ dotenv.config();
 import authRoutes from './routes/auth';
 import newsRoutes from './routes/news';
 import bookmarkRoutes from './routes/bookmarks';
+import preferencesRoutes from './routes/preferences';
 import { fetchAllFeeds } from './fetchNews';
 import { summarizeUnsummarized } from './summarizeNews';
 import { prisma } from './db';
@@ -33,6 +34,7 @@ app.use(limiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/news', newsRoutes);
 app.use('/api/bookmarks', bookmarkRoutes);
+app.use('/api/preferences', preferencesRoutes);
 
 // Health check
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
