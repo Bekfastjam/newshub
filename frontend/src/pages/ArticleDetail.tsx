@@ -12,12 +12,14 @@ interface Article {
   content: string | null;
   publishedAt: string;
   link: string;
+  imageUrl: string | null;
 }
 
 export default function ArticleDetail() {
   const { id } = useParams();
   const [article, setArticle] = useState<Article | null>(null);
   const [bookmarked, setBookmarked] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -53,6 +55,15 @@ export default function ArticleDetail() {
       </nav>
 
       <div className="max-w-3xl mx-auto px-4 py-10">
+        {article.imageUrl && !imageError && (
+          <img
+            src={article.imageUrl}
+            alt={article.title}
+            onError={() => setImageError(true)}
+            className="w-full max-h-[420px] object-cover rounded-xl mb-6 border border-gray-800"
+          />
+        )}
+
         <div className="flex items-center gap-2 mb-4">
           <span className="text-xs bg-blue-500 px-2 py-0.5 rounded-full">{article.category}</span>
           <span className="text-gray-400 text-sm">{article.source}</span>

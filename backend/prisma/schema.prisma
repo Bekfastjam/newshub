@@ -24,6 +24,7 @@ model Article {
   summary     String?
   content     String?
   aiSummary   String?
+  imageUrl    String?
   source      String
   category    String
   publishedAt DateTime

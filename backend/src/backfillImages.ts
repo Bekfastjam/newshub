@@ -18,10 +18,8 @@ const parser: Parser<{}, CustomItem> = new Parser({
 });
 
 function normalizeUrl(url: string): string {
-    // Fix feeds that double-encode structural URL characters (e.g. %2F for '/', %3D for '=')
     try {
         const decoded = decodeURIComponent(url);
-        // Only accept the decoded version if it still looks like a valid URL
         new URL(decoded);
         return decoded;
     } catch {
@@ -30,73 +28,64 @@ function normalizeUrl(url: string): string {
 }
 
 function extractImageUrl(item: any): string | null {
-    // 1. enclosure
     if (item.enclosure?.url && item.enclosure.type?.startsWith('image')) {
         return normalizeUrl(item.enclosure.url);
     }
-
-    // 2. media:content
     const mediaContent = item['media:content'];
     if (mediaContent) {
         const node = Array.isArray(mediaContent) ? mediaContent[0] : mediaContent;
         const url = node?.$?.url || node?.url;
         if (url) return normalizeUrl(url);
     }
-
-    // 3. media:thumbnail
     const mediaThumb = item['media:thumbnail'];
     if (mediaThumb) {
         const node = Array.isArray(mediaThumb) ? mediaThumb[0] : mediaThumb;
         const url = node?.$?.url || node?.url;
         if (url) return normalizeUrl(url);
     }
-
-    // 4. Fallback: scrape first <img src="..."> from content
     const html = item.content || item['content:encoded'] || item.summary || '';
     const match = html.match(/<img[^>]+src=["']([^"'>]+)["']/i);
     if (match) return normalizeUrl(match[1]);
-
     return null;
 }
 
-export async function fetchAllFeeds() {
-    console.log('Starting feed fetch...');
-    let totalNew = 0;
+async function backfill() {
+    console.log('Starting image backfill...');
+    let updated = 0;
 
     for (const source of feedSources) {
         try {
             const feed = await parser.parseURL(source.url);
 
             for (const item of feed.items) {
-                if (!item.link || !item.title) continue;
+                if (!item.link) continue;
+
+                const newImageUrl = extractImageUrl(item);
+                if (!newImageUrl) continue;
 
                 const existing = await prisma.article.findUnique({
                     where: { link: item.link },
+                    select: { id: true, imageUrl: true },
                 });
 
-                if (existing) continue;
+                if (!existing) continue;
 
-                const imageUrl = extractImageUrl(item);
-
-                await prisma.article.create({
-                    data: {
-                        title: item.title,
-                        link: item.link,
-                        summary: item.contentSnippet || item.summary || null,
-                        content: item.content || null,
-                        imageUrl: imageUrl,
-                        source: source.name,
-                        category: source.category,
-                        publishedAt: item.isoDate ? new Date(item.isoDate) : new Date(),
-                    },
-                });
-
-                totalNew++;
+                // Update if missing, or if currently broken (contains double-encoded chars)
+                const isBroken = existing.imageUrl?.includes('%2F') || existing.imageUrl?.includes('%3D');
+                if (!existing.imageUrl || isBroken) {
+                    await prisma.article.update({
+                        where: { id: existing.id },
+                        data: { imageUrl: newImageUrl },
+                    });
+                    updated++;
+                }
             }
         } catch (err) {
-            console.error(`Failed to fetch ${source.name}:`, err);
+            console.error(`Failed to backfill ${source.name}:`, err);
         }
     }
 
-    console.log(`Feed fetch complete. ${totalNew} new articles added.`);
+    console.log(`Backfill complete. ${updated} articles updated.`);
 }
+
+backfill().then(() => process.exit(0));
