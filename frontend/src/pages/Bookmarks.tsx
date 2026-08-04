@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
+import ThemeToggle from '../components/ThemeToggle';
 
 interface Bookmark {
   id: number;
@@ -28,32 +29,32 @@ export default function Bookmarks() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      <nav className="bg-gray-900 border-b border-gray-800 px-6 py-4 flex items-center justify-between">
-        <Link to="/" className="text-gray-400 hover:text-white transition">← Feed</Link>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white">
+      <nav className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 py-4 flex items-center justify-between">
+        <Link to="/" className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition">← Feed</Link>
         <h1 className="text-xl font-bold">★ Bookmarks</h1>
-        <div />
+        <ThemeToggle />
       </nav>
 
       <div className="max-w-4xl mx-auto px-4 py-8">
         {bookmarks.length === 0 ? (
-          <div className="text-center text-gray-500 py-20">
+          <div className="text-center text-gray-400 dark:text-gray-500 py-20">
             <p className="text-4xl mb-4">📭</p>
             <p>No bookmarks yet. Start saving articles!</p>
-            <Link to="/" className="text-blue-400 hover:underline mt-2 inline-block">Browse Feed</Link>
+            <Link to="/" className="text-blue-600 dark:text-blue-400 hover:underline mt-2 inline-block">Browse Feed</Link>
           </div>
         ) : (
           <div className="space-y-4">
             {bookmarks.map(b => (
-              <div key={b.id} className="bg-gray-900 rounded-xl p-5 border border-gray-800 flex justify-between items-start gap-4">
+              <div key={b.id} className="bg-white dark:bg-gray-900 rounded-xl p-5 border border-gray-200 dark:border-gray-800 flex justify-between items-start gap-4">
                 <Link to={`/article/${b.article.id}`} className="flex-1">
-                  <p className="text-xs text-gray-500 mb-1">{b.article.source} · {b.article.category}</p>
-                  <h2 className="text-white font-semibold mb-1">{b.article.title}</h2>
-                  <p className="text-gray-400 text-sm line-clamp-2">{b.article.aiSummary || b.article.summary}</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mb-1">{b.article.source} · {b.article.category}</p>
+                  <h2 className="text-gray-900 dark:text-white font-semibold mb-1">{b.article.title}</h2>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-2">{b.article.aiSummary || b.article.summary}</p>
                 </Link>
                 <button
                   onClick={() => removeBookmark(b.id)}
-                  className="text-gray-600 hover:text-red-400 transition text-xl"
+                  className="text-gray-400 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 transition text-xl"
                 >
                   ×
                 </button>

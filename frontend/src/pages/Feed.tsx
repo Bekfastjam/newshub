@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api';
+import ThemeToggle from '../components/ThemeToggle';
 
 interface Article {
   id: number;
@@ -126,18 +127,17 @@ export default function Feed() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
-      {/* Navbar */}
-      <nav className="bg-gray-900 border-b border-gray-800 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
-        <h1 className="text-xl font-bold text-white">📰 NewsHub</h1>
-        <div className="flex gap-3">
-          <Link to="/bookmarks" className="text-gray-400 hover:text-white text-sm transition">Bookmarks</Link>
-          <button onClick={handleLogout} className="text-gray-400 hover:text-red-400 text-sm transition">Logout</button>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white">
+      <nav className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+        <h1 className="text-xl font-bold text-gray-900 dark:text-white">📰 NewsHub</h1>
+        <div className="flex items-center gap-3">
+          <Link to="/bookmarks" className="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white text-sm transition">Bookmarks</Link>
+          <button onClick={handleLogout} className="text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 text-sm transition">Logout</button>
+          <ThemeToggle />
         </div>
       </nav>
 
       <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Search + Category Filter */}
         <div className="flex gap-3 mb-4">
           <input
             type="text"
@@ -145,21 +145,19 @@ export default function Feed() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && fetchArticles()}
-            className="flex-1 bg-gray-800 text-white px-4 py-2 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-1 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white px-4 py-2 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
           />
-
           <button
             onClick={fetchArticles}
-            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
           >
             Search
           </button>
         </div>
 
-        {/* Source Multi-Select Filter */}
         {allSources.length > 0 && (
           <div className="flex flex-wrap items-center gap-2 mb-8">
-            <span className="text-gray-500 text-sm mr-1">Sources:</span>
+            <span className="text-gray-400 dark:text-gray-500 text-sm mr-1">Sources:</span>
             {allSources.map(source => {
               const active = selectedSources.includes(source);
               return (
@@ -169,7 +167,7 @@ export default function Feed() {
                   className={`text-xs px-3 py-1.5 rounded-full border transition ${
                     active
                       ? 'bg-blue-600 border-blue-600 text-white'
-                      : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500'
+                      : 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500'
                   }`}
                 >
                   {source}
@@ -179,7 +177,7 @@ export default function Feed() {
             {selectedSources.length > 0 && (
               <button
                 onClick={() => setSelectedSources([])}
-                className="text-xs px-3 py-1.5 rounded-full text-gray-500 hover:text-red-400 transition"
+                className="text-xs px-3 py-1.5 rounded-full text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition"
               >
                 Clear
               </button>
@@ -187,59 +185,56 @@ export default function Feed() {
           </div>
         )}
 
-        {/* Category Multi-Select Filter */}
         {allCategories.length > 0 && (
-            <div className="flex flex-wrap items-center gap-2 mb-8">
-              <span className="text-gray-500 text-sm mr-1">Categories:</span>
-              {allCategories.map(cat => {
-                const active = selectedCategories.includes(cat);
-                return (
-                    <button
-                        key={cat}
-                        onClick={() => toggleCategory(cat)}
-                        className={`text-xs px-3 py-1.5 rounded-full border capitalize transition ${
-                            active
-                                ? 'bg-green-600 border-green-600 text-white'
-                                : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500'
-                        }`}
-                    >
-                      {cat}
-                    </button>
-                );
-              })}
-              {selectedCategories.length > 0 && (
-                  <button
-                      onClick={() => setSelectedCategories([])}
-                      className="text-xs px-3 py-1.5 rounded-full text-gray-500 hover:text-red-400 transition"
-                  >
-                    Clear
-                  </button>
-              )}
-            </div>
+          <div className="flex flex-wrap items-center gap-2 mb-8">
+            <span className="text-gray-400 dark:text-gray-500 text-sm mr-1">Categories:</span>
+            {allCategories.map(cat => {
+              const active = selectedCategories.includes(cat);
+              return (
+                <button
+                  key={cat}
+                  onClick={() => toggleCategory(cat)}
+                  className={`text-xs px-3 py-1.5 rounded-full border capitalize transition ${
+                    active
+                      ? 'bg-green-600 border-green-600 text-white'
+                      : 'bg-gray-100 dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500'
+                  }`}
+                >
+                  {cat}
+                </button>
+              );
+            })}
+            {selectedCategories.length > 0 && (
+              <button
+                onClick={() => setSelectedCategories([])}
+                className="text-xs px-3 py-1.5 rounded-full text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 transition"
+              >
+                Clear
+              </button>
+            )}
+          </div>
         )}
 
-
-        {/* Articles */}
         {loading ? (
-          <div className="text-center text-gray-400 py-20">Loading...</div>
+          <div className="text-center text-gray-400 dark:text-gray-500 py-20">Loading...</div>
         ) : articles.length === 0 ? (
-          <div className="text-center text-gray-500 py-20">No articles match your filters.</div>
+          <div className="text-center text-gray-400 dark:text-gray-500 py-20">No articles match your filters.</div>
         ) : (
           <div className="space-y-4">
             {articles.map(article => (
               <Link to={`/article/${article.id}`} key={article.id}>
-                <div className="bg-gray-900 hover:bg-gray-800 rounded-xl p-5 transition cursor-pointer border border-gray-800 hover:border-gray-600 mb-4">
+                <div className="bg-white dark:bg-gray-900 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl p-5 transition cursor-pointer border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-600 mb-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className={`text-xs px-2 py-0.5 rounded-full text-white font-medium ${categoryColors[article.category] || 'bg-gray-600'}`}>
+                    <span className={`text-xs px-2 py-0.5 rounded-full text-white font-medium ${categoryColors[article.category] || 'bg-gray-500'}`}>
                       {article.category}
                     </span>
-                    <span className="text-gray-500 text-xs">{article.source}</span>
-                    <span className="text-gray-600 text-xs ml-auto">
+                    <span className="text-gray-400 dark:text-gray-500 text-xs">{article.source}</span>
+                    <span className="text-gray-400 dark:text-gray-600 text-xs ml-auto">
                       {new Date(article.publishedAt).toLocaleDateString()}
                     </span>
                   </div>
-                  <h2 className="text-white font-semibold text-lg mb-2 leading-snug">{article.title}</h2>
-                  <p className="text-gray-400 text-sm line-clamp-2">
+                  <h2 className="text-gray-900 dark:text-white font-semibold text-lg mb-2 leading-snug">{article.title}</h2>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-2">
                     {article.aiSummary || article.summary}
                   </p>
                 </div>

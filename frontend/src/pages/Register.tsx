@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../api';
+import ThemeToggle from '../components/ThemeToggle';
 
 export default function Register() {
   const [email, setEmail] = useState('');
@@ -21,11 +22,14 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-      <div className="bg-gray-900 p-8 rounded-2xl shadow-xl w-full max-w-md">
-        <h1 className="text-3xl font-bold text-white mb-2">NewsHub</h1>
-        <p className="text-gray-400 mb-6">Create your account</p>
-        {error && <p className="text-red-400 mb-4 text-sm">{error}</p>}
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center relative">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
+      <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-xl w-full max-w-md">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">NewsHub</h1>
+        <p className="text-gray-500 dark:text-gray-400 mb-6">Create your account</p>
+        {error && <p className="text-red-500 dark:text-red-400 mb-4 text-sm">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="email"
@@ -34,7 +38,7 @@ export default function Register() {
             placeholder="Email"
             value={email}
             onChange={e => setEmail(e.target.value)}
-            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
           />
           <input
             type="password"
@@ -43,7 +47,7 @@ export default function Register() {
             placeholder="Password (min 6 chars)"
             value={password}
             onChange={e => setPassword(e.target.value)}
-            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white px-4 py-3 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
           />
           <button
             type="submit"
@@ -52,9 +56,9 @@ export default function Register() {
             Create Account
           </button>
         </form>
-        <p className="text-gray-400 text-sm mt-4 text-center">
+        <p className="text-gray-500 dark:text-gray-400 text-sm mt-4 text-center">
           Already have an account?{' '}
-          <Link to="/login" className="text-blue-400 hover:underline">Sign in</Link>
+          <Link to="/login" className="text-blue-600 dark:text-blue-400 hover:underline">Sign in</Link>
         </p>
       </div>
     </div>

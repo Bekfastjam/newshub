@@ -55,7 +55,7 @@ const PreferenceSelector: React.FC<PreferenceSelectorProps> = ({
   };
 
   if (loading) {
-    return <div className="text-sm text-gray-400 py-4">Loading options...</div>;
+    return <div className="text-sm text-gray-500 dark:text-gray-400 py-4">Loading options...</div>;
   }
 
   const isCompact = mode === 'compact';
@@ -63,7 +63,7 @@ const PreferenceSelector: React.FC<PreferenceSelectorProps> = ({
   return (
     <div className={isCompact ? 'flex flex-wrap items-center gap-4' : 'space-y-6'}>
       <div>
-        {!isCompact && <h3 className="text-sm font-semibold text-gray-700 mb-2">Sources</h3>}
+        {!isCompact && <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Sources</h3>}
         <div className="flex flex-wrap gap-2">
           {sources.map((source) => {
             const active = selectedSources.includes(source);
@@ -75,7 +75,7 @@ const PreferenceSelector: React.FC<PreferenceSelectorProps> = ({
                 className={`px-3 py-1 rounded-full text-sm border transition-colors ${
                   active
                     ? 'bg-blue-600 text-white border-blue-600'
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'
+                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500'
                 }`}
               >
                 {source}
@@ -86,7 +86,7 @@ const PreferenceSelector: React.FC<PreferenceSelectorProps> = ({
       </div>
 
       <div>
-        {!isCompact && <h3 className="text-sm font-semibold text-gray-700 mb-2">Categories</h3>}
+        {!isCompact && <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Categories</h3>}
         <div className="flex flex-wrap gap-2">
           {categories.map((category) => {
             const active = selectedCategories.includes(category);
@@ -98,7 +98,7 @@ const PreferenceSelector: React.FC<PreferenceSelectorProps> = ({
                 className={`px-3 py-1 rounded-full text-sm border capitalize transition-colors ${
                   active
                     ? 'bg-green-600 text-white border-green-600'
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-green-400'
+                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:border-green-400 dark:hover:border-green-500'
                 }`}
               >
                 {category}
