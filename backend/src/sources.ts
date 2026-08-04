@@ -16,4 +16,5 @@ export const feedSources: FeedSource[] = [
     { name: 'New York Post', url: 'https://nypost.com/feed/', category: 'general' },
     { name: 'Business Insider', url: 'https://www.businessinsider.com/rss', category: 'business' },
     { name: 'The Wall Street Journal', url: 'https://feeds.a.dj.com/rss/RSSWorldNews.xml', category: 'business' },
+    { name: 'Gazeta.uz', url: 'https://www.gazeta.uz/en/rss/', category: 'general' },
 ];
