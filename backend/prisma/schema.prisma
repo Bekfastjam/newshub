@@ -7,7 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
   id          Int          @id @default(autoincrement())
   email       String       @unique
@@ -30,6 +29,9 @@ model Article {
   publishedAt DateTime
   createdAt   DateTime   @default(now())
   bookmarks   Bookmark[]
+  embedding   Float[]    @default([])
+  clusterId   Int?
+  cluster     StoryCluster? @relation(fields: [clusterId], references: [id])
 }
 
 model Bookmark {
@@ -55,4 +57,11 @@ model SourcePreference {
   source    String
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
+}
+
+model StoryCluster {
+  id        Int       @id @default(autoincrement())
+  title     String?
+  createdAt DateTime  @default(now())
+  articles  Article[]
 }

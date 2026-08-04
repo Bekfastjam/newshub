@@ -18,7 +18,7 @@ const GUEST_FILTERS_KEY = 'newshub_guest_filters';
 export default function Feed() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [search, setSearch] = useState('');
-  const [category, setCategory] = useState('');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [allSources, setAllSources] = useState<string[]>([]);
   const [allCategories, setAllCategories] = useState<string[]>([]);
   const [selectedSources, setSelectedSources] = useState<string[]>([]);
@@ -44,7 +44,7 @@ export default function Feed() {
       if (isLoggedIn) {
         try {
           const res = await api.get('/api/preferences');
-          setCategory(res.data.categories?.[0] || '');
+          setSelectedCategories(res.data.categories || []);
           setSelectedSources(res.data.sources || []);
         } catch (err) {
           console.error('Failed to load preferences', err);
@@ -54,7 +54,7 @@ export default function Feed() {
         if (saved) {
           try {
             const parsed = JSON.parse(saved);
-            setCategory(parsed.category || '');
+            setSelectedCategories(parsed.categories || []);
             setSelectedSources(parsed.sources || []);
           } catch {
             // ignore malformed cached data
@@ -71,7 +71,7 @@ export default function Feed() {
     setLoading(true);
     const params = new URLSearchParams();
     if (search) params.append('search', search);
-    if (category) params.append('category', category);
+    if (selectedCategories.length > 0) params.append('category', selectedCategories.join(','));
     if (selectedSources.length > 0) params.append('source', selectedSources.join(','));
     const res = await api.get(`/api/news?${params.toString()}`);
     setArticles(res.data);
@@ -82,7 +82,7 @@ export default function Feed() {
     if (isLoggedIn) {
       try {
         await api.put('/api/preferences', {
-          categories: category ? [category] : [],
+          categories: selectedCategories,
           sources: selectedSources,
         });
       } catch (err) {
@@ -91,7 +91,7 @@ export default function Feed() {
     } else {
       localStorage.setItem(
         GUEST_FILTERS_KEY,
-        JSON.stringify({ category, sources: selectedSources })
+        JSON.stringify({ categories: selectedCategories, sources: selectedSources })
       );
     }
   };
@@ -100,13 +100,19 @@ export default function Feed() {
     if (!prefsLoaded) return;
     fetchArticles();
     persistFilters();
-  }, [category, selectedSources, prefsLoaded]);
+  }, [selectedCategories, selectedSources, prefsLoaded]);
 
   const toggleSource = (source: string) => {
     setSelectedSources(prev =>
       prev.includes(source) ? prev.filter(s => s !== source) : [...prev, source]
     );
   };
+  const toggleCategory = (cat: string) => {
+    setSelectedCategories(prev =>
+        prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+    );
+  };
+
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -141,18 +147,7 @@ export default function Feed() {
             onKeyDown={e => e.key === 'Enter' && fetchArticles()}
             className="flex-1 bg-gray-800 text-white px-4 py-2 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <select
-            value={category}
-            onChange={e => setCategory(e.target.value)}
-            className="bg-gray-800 text-white px-4 py-2 rounded-lg outline-none"
-          >
-            <option value="">All Categories</option>
-            {allCategories.map(cat => (
-              <option key={cat} value={cat}>
-                {cat.charAt(0).toUpperCase() + cat.slice(1)}
-              </option>
-            ))}
-          </select>
+
           <button
             onClick={fetchArticles}
             className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition"
@@ -191,6 +186,38 @@ export default function Feed() {
             )}
           </div>
         )}
+
+        {/* Category Multi-Select Filter */}
+        {allCategories.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2 mb-8">
+              <span className="text-gray-500 text-sm mr-1">Categories:</span>
+              {allCategories.map(cat => {
+                const active = selectedCategories.includes(cat);
+                return (
+                    <button
+                        key={cat}
+                        onClick={() => toggleCategory(cat)}
+                        className={`text-xs px-3 py-1.5 rounded-full border capitalize transition ${
+                            active
+                                ? 'bg-green-600 border-green-600 text-white'
+                                : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500'
+                        }`}
+                    >
+                      {cat}
+                    </button>
+                );
+              })}
+              {selectedCategories.length > 0 && (
+                  <button
+                      onClick={() => setSelectedCategories([])}
+                      className="text-xs px-3 py-1.5 rounded-full text-gray-500 hover:text-red-400 transition"
+                  >
+                    Clear
+                  </button>
+              )}
+            </div>
+        )}
+
 
         {/* Articles */}
         {loading ? (

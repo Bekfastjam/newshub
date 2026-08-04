@@ -13,6 +13,7 @@ import bookmarkRoutes from './routes/bookmarks';
 import preferencesRoutes from './routes/preferences';
 import { fetchAllFeeds } from './fetchNews';
 import { summarizeUnsummarized } from './summarizeNews';
+import { clusterArticles } from './clusterArticles';
 import { prisma } from './db';
 
 const app = express();
@@ -45,10 +46,12 @@ cron.schedule('*/30 * * * *', async () => {
     await fetchAllFeeds();
 });
 
-// Cron: summarize new articles every hour
+// Cron: summarize + cluster new articles every hour
 cron.schedule('0 * * * *', async () => {
     console.log('⏰ Cron: Summarizing new articles...');
     await summarizeUnsummarized();
+    console.log('⏰ Cron: Clustering articles...');
+    await clusterArticles();
 });
 
 // Cron: cleanup old articles daily at 3 AM
