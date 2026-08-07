@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../api';
 import ThemeToggle from '../components/ThemeToggle';
+import { sourceGroups, expandSourceSelection } from '../sourceGroups';
 
 interface Article {
   id: number;
@@ -16,6 +17,21 @@ interface Article {
 
 const GUEST_FILTERS_KEY = 'newshub_guest_filters';
 
+// Reverse-lookup: given a raw DB source name, find which brand it belongs to.
+// Falls back to the raw name itself if it's not part of any group.
+function getBrandForSource(raw: string): string {
+  for (const [brand, list] of Object.entries(sourceGroups)) {
+    if (list.includes(raw)) return brand;
+  }
+  return raw;
+}
+
+// Normalize any stored/loaded source values (which may be old raw strings
+// from before grouping existed) into deduplicated brand names.
+function normalizeToBrands(sources: string[]): string[] {
+  return Array.from(new Set(sources.map(getBrandForSource)));
+}
+
 export default function Feed() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [search, setSearch] = useState('');
@@ -26,6 +42,11 @@ export default function Feed() {
   const [loading, setLoading] = useState(true);
   const [prefsLoaded, setPrefsLoaded] = useState(false);
   const navigate = useNavigate();
+
+  const displayBrands = useMemo(
+    () => Array.from(new Set(allSources.map(getBrandForSource))).sort(),
+    [allSources]
+  );
 
   const isLoggedIn = !!localStorage.getItem('token');
 
@@ -46,7 +67,7 @@ export default function Feed() {
         try {
           const res = await api.get('/api/preferences');
           setSelectedCategories(res.data.categories || []);
-          setSelectedSources(res.data.sources || []);
+          setSelectedSources(normalizeToBrands(res.data.sources || []));
         } catch (err) {
           console.error('Failed to load preferences', err);
         }
@@ -56,7 +77,7 @@ export default function Feed() {
           try {
             const parsed = JSON.parse(saved);
             setSelectedCategories(parsed.categories || []);
-            setSelectedSources(parsed.sources || []);
+            setSelectedSources(normalizeToBrands(parsed.sources || []));
           } catch {
             // ignore malformed cached data
           }
@@ -73,7 +94,8 @@ export default function Feed() {
     const params = new URLSearchParams();
     if (search) params.append('search', search);
     if (selectedCategories.length > 0) params.append('category', selectedCategories.join(','));
-    if (selectedSources.length > 0) params.append('source', selectedSources.join(','));
+    const expandedSources = expandSourceSelection(selectedSources);
+    if (expandedSources.length > 0) params.append('source', expandedSources.join(','));
     const res = await api.get(`/api/news?${params.toString()}`);
     setArticles(res.data);
     setLoading(false);
@@ -155,10 +177,10 @@ export default function Feed() {
           </button>
         </div>
 
-        {allSources.length > 0 && (
+        {displayBrands.length > 0 && (
           <div className="flex flex-wrap items-center gap-2 mb-8">
             <span className="text-gray-400 dark:text-gray-500 text-sm mr-1">Sources:</span>
-            {allSources.map(source => {
+            {displayBrands.map(source => {
               const active = selectedSources.includes(source);
               return (
                 <button
